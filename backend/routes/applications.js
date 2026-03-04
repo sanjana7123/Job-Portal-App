@@ -68,7 +68,7 @@ router.get('/job/:jobId', [auth, isRecruiter], async (req, res) => {
 
 router.patch('/:id/status', [auth, isRecruiter], async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, interviewDetails } = req.body;
     const application = await Application.findById(req.params.id).populate('jobId');
     
     if (!application) {
@@ -79,9 +79,42 @@ router.patch('/:id/status', [auth, isRecruiter], async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
+    // Add to status history
+    application.statusHistory.push({
+      status: status,
+      changedBy: req.user.userId,
+      changedAt: new Date()
+    });
+
     application.status = status;
+    
+    // If scheduling interview, save interview details
+    if (status === 'interview_scheduled' && interviewDetails) {
+      application.interviewDetails = interviewDetails;
+    }
+    
     await application.save();
     res.json(application);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all scheduled interviews for recruiter
+router.get('/recruiter/interviews', [auth, isRecruiter], async (req, res) => {
+  try {
+    const jobs = await Job.find({ recruiterId: req.user.userId });
+    const jobIds = jobs.map(job => job._id);
+    
+    const interviews = await Application.find({
+      jobId: { $in: jobIds },
+      status: 'interview_scheduled'
+    })
+      .populate('userId', 'name email profile')
+      .populate('jobId', 'title company')
+      .sort({ 'interviewDetails.date': 1 });
+    
+    res.json(interviews);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

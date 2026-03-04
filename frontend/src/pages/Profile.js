@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api/axios';
+import api, { getBaseURL } from '../api/axios';
 
 function Profile() {
   const [profile, setProfile] = useState({
@@ -9,10 +9,12 @@ function Profile() {
     education: [],
     experience: [],
     skills: [],
-    certifications: []
+    certifications: [],
+    resume: null
   });
   const [editing, setEditing] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -36,6 +38,32 @@ function Profile() {
       alert('Profile updated successfully!');
     } catch (err) {
       alert('Failed to update profile');
+    }
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    setUploading(true);
+    try {
+      const { data } = await api.post('/upload/resume', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setProfile({
+        ...profile,
+        resume: data
+      });
+      
+      alert('Resume uploaded successfully!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to upload resume');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -344,6 +372,61 @@ function Profile() {
             <button onClick={addCertification} className="btn btn-secondary">
               + Add Certification
             </button>
+          )}
+        </div>
+
+        <div className="profile-section">
+          <h3>Resume</h3>
+          {profile.resume?.url ? (
+            <div className="profile-item">
+              <p><strong>Current Resume:</strong> {profile.resume.filename}</p>
+              <p style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>
+                Uploaded: {new Date(profile.resume.uploadedAt).toLocaleDateString()}
+              </p>
+              <div className="btn-group" style={{marginTop: '12px'}}>
+                <a 
+                  href={`${getBaseURL()}${profile.resume.url}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                >
+                  View Resume
+                </a>
+                {editing && (
+                  <label className="btn btn-primary" style={{cursor: 'pointer'}}>
+                    {uploading ? 'Uploading...' : 'Upload New'}
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleResumeUpload}
+                      style={{display: 'none'}}
+                      disabled={uploading}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="profile-item">
+              <p style={{color: '#6b7280', marginBottom: '12px'}}>No resume uploaded</p>
+              {editing && (
+                <label className="btn btn-primary" style={{cursor: 'pointer'}}>
+                  {uploading ? 'Uploading...' : 'Upload Resume'}
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleResumeUpload}
+                    style={{display: 'none'}}
+                    disabled={uploading}
+                  />
+                </label>
+              )}
+            </div>
+          )}
+          {editing && (
+            <p style={{fontSize: '12px', color: '#6b7280', marginTop: '8px'}}>
+              Accepted formats: PDF, DOC, DOCX (Max 5MB)
+            </p>
           )}
         </div>
       </div>

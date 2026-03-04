@@ -29,9 +29,40 @@ function UserDashboard() {
             <p style={{marginBottom: '6px', color: '#6b7280', fontSize: '14px'}}><strong>Company:</strong> {app.jobId?.company}</p>
             <p style={{marginBottom: '6px', color: '#6b7280', fontSize: '14px'}}><strong>Location:</strong> {app.jobId?.location}</p>
             <p style={{marginBottom: '12px', color: '#6b7280', fontSize: '14px'}}><strong>Applied:</strong> {new Date(app.appliedAt).toLocaleDateString()}</p>
-            <span className={`badge badge-${app.status}`}>
-              {app.status}
-            </span>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '12px'}}>
+              <span><strong>Status:</strong></span>
+              <span className={`badge badge-${app.status}`}>
+                {app.status.replace('_', ' ')}
+              </span>
+            </div>
+            
+            {app.status === 'interview_scheduled' && app.interviewDetails && (
+              <div className="profile-item" style={{background: '#eff6ff', borderColor: '#bfdbfe', marginTop: '12px'}}>
+                <h4 style={{marginBottom: '12px', color: '#1e40af', fontSize: '16px'}}>Interview Details</h4>
+                <p style={{marginBottom: '6px', fontSize: '14px'}}>
+                  <strong>Date:</strong> {new Date(app.interviewDetails.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
+                <p style={{marginBottom: '6px', fontSize: '14px'}}>
+                  <strong>Time:</strong> {app.interviewDetails.time}
+                </p>
+                {app.interviewDetails.location && (
+                  <p style={{marginBottom: '6px', fontSize: '14px'}}>
+                    <strong>Location:</strong> {app.interviewDetails.location}
+                  </p>
+                )}
+                {app.interviewDetails.notes && (
+                  <div style={{marginTop: '12px', padding: '12px', background: 'white', borderRadius: '4px', border: '1px solid #dbeafe'}}>
+                    <strong style={{fontSize: '14px'}}>Additional Notes:</strong>
+                    <p style={{marginTop: '6px', fontSize: '14px', color: '#4b5563'}}>{app.interviewDetails.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))
       )}

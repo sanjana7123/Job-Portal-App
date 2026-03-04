@@ -26,7 +26,11 @@ const userSchema = new mongoose.Schema({
       issuer: String,
       year: String
     }],
-    resume: { type: String }
+    resume: { 
+      filename: String,
+      url: String,
+      uploadedAt: Date
+    }
   },
   createdAt: { type: Date, default: Date.now }
 });
