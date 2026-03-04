@@ -85,8 +85,8 @@ function RecruiterDashboard() {
           ) : (
             applicants.map(app => (
               <div key={app._id} className="card">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px'}}>
-                  <div style={{flex: 1}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px'}}>
+                  <div style={{flex: 1, minWidth: '200px'}}>
                     <p style={{marginBottom: '6px', color: '#1f2937'}}><strong>Name:</strong> {app.userId?.name}</p>
                     <p style={{marginBottom: '6px', color: '#6b7280', fontSize: '14px'}}><strong>Email:</strong> {app.userId?.email}</p>
                     <p style={{marginBottom: '10px', color: '#6b7280', fontSize: '14px'}}><strong>Applied:</strong> {new Date(app.appliedAt).toLocaleDateString()}</p>
@@ -95,6 +95,7 @@ function RecruiterDashboard() {
                   <button 
                     onClick={() => setViewingApplicant(app.userId)} 
                     className="btn btn-secondary"
+                    style={{alignSelf: 'flex-start'}}
                   >
                     View Profile
                   </button>
@@ -115,7 +116,7 @@ function RecruiterDashboard() {
 
       {viewingApplicant && (
         <div className="modal-overlay" onClick={() => setViewingApplicant(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '700px', maxHeight: '80vh', overflow: 'auto'}}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '700px'}}>
             <h3>Applicant Profile</h3>
             <div style={{marginTop: '20px'}}>
               <p><strong>Name:</strong> {viewingApplicant.name}</p>
